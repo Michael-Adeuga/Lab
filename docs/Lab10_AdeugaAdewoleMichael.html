@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset = "utf-8">
+<meta name = "viewport" content= "initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Swipe Widget and Collapsable Legend/List</title>
+<style>
+html, body, 
+#viewDiv {
+padding: 0;
+margin: 0;
+height: 100%;
+width:  100%
+}
+</style>
+<link rel = "stylesheet" href= "https://js.arcgis.com/4.13/esri/themes/light/main.css"/>
+<script src = "https://js.arcgis.com/4.13/"></script>
+    <script>
+    require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/MapImageLayer",
+        "esri/widgets/Swipe",
+        "esri/widgets/Expand",
+        "esri/widgets/LayerList"
+    ], function(
+          Map, MapView, MapImageLayer, Swipe, Expand, LayerList)
+        {
+        var mymap = new Map({
+            basemap: "dark-gray",
+        });
+        var myview = new MapView({
+            container: "viewDiv",
+            map: mymap,
+            zoom: 4,
+            center: [-50, 35]
+        });
+        
+        var weeklyTempAnomaly = new MapImageLayer({
+            url: "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer",
+            sublayers: [{
+                id: 7,
+                title: "Weekly Global Sea Surface Temp Anomaly"
+            }],
+            title: "Surface Sea Temperature Anomaly"
+        });
+        mymap.add(weeklyTempAnomaly);
+        
+        mymap.add(weeklyTempAnomaly);
+        
+        var weeklyTemp = new MapImageLayer({
+            url: "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer",
+            sublayers: [{
+                id: 3,
+                title: "weekly Global Sea Surface Temperature"
+            }],
+            
+            title: "Surface Sea Temperature"
+        });
+        
+        mymap.add(weeklyTemp);
+        
+        const mySwipe = new Swipe({
+            leadingLayers: [weeklyTempAnomaly],
+            trailingLayers: [weeklyTemp],
+            position: 20,
+            view: myview
+        });
+        
+        myview.ui.add(mySwipe);
+        
+        const legendListExpand = new Expand({
+            expandIconClass: "esri-icon-collection",
+            expandTooltip: "Legend",
+            view: myview,
+            content: new LayerList ({
+                view: myview,
+                listItemCreatedFunction: function(event) {
+                    const item = event.item;
+                    if (item.layer.type != "group") {
+                        item.panel = {
+                            content: "legend",
+                            open: true
+                        };
+                    }
+                }
+            }),
+            expanded: false
+        });
+        myview.ui.add(legendListExpand, "top-left");
+    });
+    
+    
+    </script>
+</head>
+<body>
+<div id = "viewDiv"></div>
+</body>
+</html>
+
